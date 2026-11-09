@@ -1,0 +1,39 @@
+# Sri Krishna Department Store - Docker setup
+#
+#   docker compose up -d --build      build and start (site on http://localhost:${HTTP_PORT})
+#   docker compose logs -f backend    watch the API log
+#   docker compose down               stop
+#
+# Settings:
+#   .env (this folder)   SITE_URL, HTTP_PORT, TRUST_PROXY  - used by this file
+#   backend/.env         MONGO_URI, JWT_SECRET, JWT_EXPIRES_IN, DEFAULT_ADMIN_* - secrets for the API
+# The database is MongoDB Atlas (cloud), so there is no database container.
+
+services:
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    env_file: ./backend/.env
+    # These win over backend/.env inside Docker
+    environment:
+      NODE_ENV: production
+      PORT: "5000"
+      CLIENT_URL: ${SITE_URL:?Set SITE_URL in the .env file next to docker-compose.yml}
+      TRUST_PROXY: ${TRUST_PROXY:-1}
+    volumes:
+      # Product photos, logo, hero and gallery images (kept outside the container)
+      - ./backend/uploads:/app/uploads
+    expose:
+      - "5000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: ${SITE_URL:?Set SITE_URL in the .env file next to docker-compose.yml}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${HTTP_PORT:-8080}:80"

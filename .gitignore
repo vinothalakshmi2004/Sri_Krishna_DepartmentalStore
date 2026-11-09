@@ -1,0 +1,21 @@
+# Secrets (each app also has its own .gitignore)
+.env
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+dist/
+
+# Local MongoDB install + data (363 MB, not needed - the app uses MongoDB Atlas)
+mongodb/
+
+# Local-only files, not needed for deployment
+*.docx
+*.pdf
+WhatsApp Image*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
